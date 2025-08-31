@@ -29,7 +29,7 @@ export function HeroSection() {
       <div className="absolute top-20 right-10 w-32 h-32 bg-black rounded-full opacity-10 blur-xl"></div>
       <div className="absolute bottom-20 left-10 w-24 h-24 bg-gray-800 rounded-full opacity-5 blur-lg"></div>
 
-      <div className="container px-4 mx-auto py-20 lg:py-32 relative z-20">
+      <div className="container px-4 mx-auto pt-20 lg:pt-32 relative z-20">
         <div className="max-w-4xl mx-auto text-center space-y-8">
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-black leading-tight">
             ELEVATE YOUR
@@ -51,37 +51,6 @@ export function HeroSection() {
             >
               <Link href="/products/new">New Arrivals</Link>
             </Button>
-          </div>
-        </div>
-      </div>
-
-      <div className="relative py-16 bg-gray-50">
-        <div className="container px-4 mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 items-center justify-center opacity-60">
-            <div className="text-center space-y-2">
-              <div className="w-20 h-20 bg-white rounded-2xl shadow-lg mx-auto flex items-center justify-center">
-                <div className="w-12 h-12 bg-black rounded-lg"></div>
-              </div>
-              <p className="text-sm font-medium text-gray-600">Athletic Wear</p>
-            </div>
-            <div className="text-center space-y-2">
-              <div className="w-20 h-20 bg-white rounded-2xl shadow-lg mx-auto flex items-center justify-center">
-                <div className="w-12 h-8 bg-gray-800 rounded-full"></div>
-              </div>
-              <p className="text-sm font-medium text-gray-600">Footwear</p>
-            </div>
-            <div className="text-center space-y-2">
-              <div className="w-20 h-20 bg-white rounded-2xl shadow-lg mx-auto flex items-center justify-center">
-                <div className="w-10 h-10 bg-black rounded-full border-4 border-gray-300"></div>
-              </div>
-              <p className="text-sm font-medium text-gray-600">Equipment</p>
-            </div>
-            <div className="text-center space-y-2">
-              <div className="w-20 h-20 bg-white rounded-2xl shadow-lg mx-auto flex items-center justify-center">
-                <div className="w-12 h-6 bg-gradient-to-r from-black to-gray-600 rounded-lg"></div>
-              </div>
-              <p className="text-sm font-medium text-gray-600">Accessories</p>
-            </div>
           </div>
         </div>
       </div>

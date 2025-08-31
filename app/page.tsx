@@ -10,10 +10,11 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       <HeroSection />
+              <CustomProductsCTA />
       <div className="container px-4 mx-auto space-y-20">
         <CategorySection />
 
-        <section className="py-16">
+        <section className="py-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center space-y-4">
               <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto">
@@ -41,7 +42,7 @@ export default function Home() {
 
         <FeaturedProducts />
 
-        <CustomProductsCTA />
+
 
         <div className="flex flex-col items-center justify-center space-y-6 text-center py-16 bg-black rounded-3xl text-white">
           <h2 className="text-4xl font-bold tracking-tight">Ready to Elevate Your Game?</h2>

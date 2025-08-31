@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { useCart } from "@/components/cart-provider"
 import { MarqueeBanner } from "@/components/marquee-banner"
+import Image from "next/image"
+import logo from '../public/logo.png';
 
 export function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
@@ -61,8 +63,8 @@ export function Header() {
           </Sheet>
 
           <Link href="/" className="flex items-center gap-2">
-            <span className="text-2xl font-bold text-black tracking-tight">VELORA</span>
-            <span className="text-2xl font-light text-gray-600">SPORTS</span>
+<Image src={logo} alt="Velora Sports Logo" className="h-12 w-auto" />
+            
           </Link>
 
           <nav className="flex-1 hidden md:flex items-center justify-center gap-8 text-sm">

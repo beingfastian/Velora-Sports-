@@ -1,5 +1,7 @@
 import Link from "next/link"
 import { Facebook, Instagram, Twitter } from "lucide-react"
+import Image from "next/image"
+import logo from '../public/logo.png';
 
 export function Footer() {
   return (
@@ -7,7 +9,10 @@ export function Footer() {
       <div className="container px-4 py-12 mx-auto">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
           <div className="space-y-4">
-            <h3 className="text-lg font-bold">VELORA SPORTS</h3>
+                      <Link href="/" className="flex items-center gap-2">
+<Image src={logo} alt="Velora Sports Logo" className="h-12 w-auto" />
+            
+          </Link>
             <p className="text-sm text-muted-foreground">
               Premium athletic gear for champions. Strength, energy, and health in every product.
             </p>
