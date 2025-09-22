@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Palette, Shirt } from "lucide-react";
-import ShirtCustomizer from "./customizer/ShirtCustomizer";
+import MultiProductCustomizer from "./customizer/MultiProductCustomizer";
 
 export function CustomProductsCTA() {
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
@@ -100,7 +100,7 @@ export function CustomProductsCTA() {
       </section>
 
       {/* 3D Shirt Customizer Modal */}
-      <ShirtCustomizer 
+      <MultiProductCustomizer
         isOpen={isCustomizerOpen} 
         onClose={() => setIsCustomizerOpen(false)} 
       />
