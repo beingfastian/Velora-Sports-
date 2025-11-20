@@ -32,12 +32,17 @@ export default function CartPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-4">
-          {cartItems.map((item) => (
-            <Card key={item.id} className="overflow-hidden">
+          {cartItems.map((item, index) => (
+            <Card key={`${item.id}-${item.selectedSize}-${item.selectedColor}-${index}`} className="overflow-hidden">
               <CardContent className="p-0">
                 <div className="flex flex-col sm:flex-row">
                   <div className="relative w-full sm:w-[120px] h-[120px]">
-                    <Image src={item.image || "/placeholder.svg"} alt={item.name} fill className="object-cover" />
+                    <Image 
+                      src={item.images[0] || "/placeholder.svg"} 
+                      alt={item.name} 
+                      fill 
+                      className="object-cover" 
+                    />
                   </div>
                   <div className="p-4 flex-1 flex flex-col sm:flex-row sm:items-center">
                     <div className="flex-1">
@@ -53,16 +58,16 @@ export default function CartPage() {
                         variant="outline"
                         size="icon"
                         className="h-8 w-8"
-                        onClick={() => updateQuantity(item.id, (item.quantity || 1) - 1)}
+                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
                       >
                         <Minus className="h-3 w-3" />
                       </Button>
-                      <span className="w-10 text-center">{item.quantity || 1}</span>
+                      <span className="w-10 text-center">{item.quantity}</span>
                       <Button
                         variant="outline"
                         size="icon"
                         className="h-8 w-8"
-                        onClick={() => updateQuantity(item.id, (item.quantity || 1) + 1)}
+                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
                       >
                         <Plus className="h-3 w-3" />
                       </Button>

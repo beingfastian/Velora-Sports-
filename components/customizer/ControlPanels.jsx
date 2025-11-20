@@ -1,17 +1,18 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Type, Upload, Eye, Save, RotateCcw } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
 
 const fonts = [
-  'Arial', 'Times New Roman', 'Helvetica', 'Georgia', 'Verdana', 
+  'Arial', 'Times New Roman', 'Helvetica', 'Georgia', 'Verdana',
   'Impact', 'Comic Sans MS', 'Trebuchet MS'
 ];
 
-export function TextControlPanel({ 
-  isOpen, 
-  activeProduct, 
-  customState, 
-  onUpdateState 
+export function TextControlPanel({
+  isOpen,
+  activeProduct,
+  customState,
+  onUpdateState
 }) {
   if (!isOpen) return null;
 
@@ -26,144 +27,80 @@ export function TextControlPanel({
         <Type className="w-5 h-5 mr-2" />
         Text Settings
       </h3>
-      
-      {activeProduct === 'shirt' ? (
-        <>
-          {/* Front Text */}
-          <div className="bg-blue-50 p-4 rounded-lg mb-4">
-            <h4 className="font-semibold text-blue-800 mb-3">Front Text</h4>
-            <div className="space-y-3">
-              <input
-                type="text"
-                value={customState.frontText || ''}
-                onChange={(e) => onUpdateState({ frontText: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Enter front text"
-              />
-              <div className="grid grid-cols-2 gap-3">
-                <select
-                  value={customState.frontTextFont || 'Arial'}
-                  onChange={(e) => onUpdateState({ frontTextFont: e.target.value })}
-                  className="px-2 py-2 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-blue-500"
-                >
-                  {fonts.map((font) => (
-                    <option key={font} value={font}>{font}</option>
-                  ))}
-                </select>
-                <input
-                  type="color"
-                  value={customState.frontTextColor || '#000000'}
-                  onChange={(e) => onUpdateState({ frontTextColor: e.target.value })}
-                  className="w-full h-10 border border-gray-300 rounded-lg cursor-pointer"
-                />
-              </div>
-            </div>
-          </div>
 
-          {/* Back Text */}
-          <div className="bg-green-50 p-4 rounded-lg">
-            <h4 className="font-semibold text-green-800 mb-3">Back Text</h4>
-            <div className="space-y-3">
+      {/* Only Shirt Text Options */}
+      <>
+        {/* Front Text */}
+        <div className="bg-blue-50 p-4 rounded-lg mb-4">
+          <h4 className="font-semibold text-blue-800 mb-3">Front Text</h4>
+          <div className="space-y-3">
+            <input
+              type="text"
+              value={customState.frontText || ''}
+              onChange={(e) => onUpdateState({ frontText: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter front text"
+            />
+            <div className="grid grid-cols-2 gap-3">
+              <select
+                value={customState.frontTextFont || 'Arial'}
+                onChange={(e) => onUpdateState({ frontTextFont: e.target.value })}
+                className="px-2 py-2 border rounded-lg text-xs"
+              >
+                {fonts.map((font) => (
+                  <option key={font} value={font}>{font}</option>
+                ))}
+              </select>
               <input
-                type="text"
-                value={customState.backText || ''}
-                onChange={(e) => onUpdateState({ backText: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                placeholder="Enter back text"
+                type="color"
+                value={customState.frontTextColor || '#000000'}
+                onChange={(e) => onUpdateState({ frontTextColor: e.target.value })}
+                className="w-full h-10 border rounded-lg cursor-pointer"
               />
-              <div className="grid grid-cols-2 gap-3">
-                <select
-                  value={customState.backTextFont || 'Arial'}
-                  onChange={(e) => onUpdateState({ backTextFont: e.target.value })}
-                  className="px-2 py-2 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-green-500"
-                >
-                  {fonts.map((font) => (
-                    <option key={font} value={font}>{font}</option>
-                  ))}
-                </select>
-                <input
-                  type="color"
-                  value={customState.backTextColor || '#000000'}
-                  onChange={(e) => onUpdateState({ backTextColor: e.target.value })}
-                  className="w-full h-10 border border-gray-300 rounded-lg cursor-pointer"
-                />
-              </div>
             </div>
           </div>
-        </>
-      ) : (
-        <>
-          {/* Right Leg Text */}
-          <div className="bg-blue-50 p-4 rounded-lg mb-4">
-            <h4 className="font-semibold text-blue-800 mb-3">Right Leg Text</h4>
-            <div className="space-y-3">
-              <input
-                type="text"
-                value={customState.rightLegText || ''}
-                onChange={(e) => onUpdateState({ rightLegText: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Enter right leg text"
-              />
-              <div className="grid grid-cols-2 gap-3">
-                <select
-                  value={customState.rightLegTextFont || 'Arial'}
-                  onChange={(e) => onUpdateState({ rightLegTextFont: e.target.value })}
-                  className="px-2 py-2 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-blue-500"
-                >
-                  {fonts.map((font) => (
-                    <option key={font} value={font}>{font}</option>
-                  ))}
-                </select>
-                <input
-                  type="color"
-                  value={customState.rightLegTextColor || '#FFFFFF'}
-                  onChange={(e) => onUpdateState({ rightLegTextColor: e.target.value })}
-                  className="w-full h-10 border border-gray-300 rounded-lg cursor-pointer"
-                />
-              </div>
-            </div>
-          </div>
+        </div>
 
-          {/* Left Leg Text */}
-          <div className="bg-green-50 p-4 rounded-lg">
-            <h4 className="font-semibold text-green-800 mb-3">Left Leg Text</h4>
-            <div className="space-y-3">
+        {/* Back Text */}
+        <div className="bg-green-50 p-4 rounded-lg">
+          <h4 className="font-semibold text-green-800 mb-3">Back Text</h4>
+          <div className="space-y-3">
+            <input
+              type="text"
+              value={customState.backText || ''}
+              onChange={(e) => onUpdateState({ backText: e.target.value })}
+              className="w-full px-3 py-2 border rounded-lg text-sm"
+              placeholder="Enter back text"
+            />
+            <div className="grid grid-cols-2 gap-3">
+              <select
+                value={customState.backTextFont || 'Arial'}
+                onChange={(e) => onUpdateState({ backTextFont: e.target.value })}
+                className="px-2 py-2 border rounded-lg text-xs"
+              >
+                {fonts.map((font) => (
+                  <option key={font} value={font}>{font}</option>
+                ))}
+              </select>
               <input
-                type="text"
-                value={customState.leftLegText || ''}
-                onChange={(e) => onUpdateState({ leftLegText: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                placeholder="Enter left leg text"
+                type="color"
+                value={customState.backTextColor || '#000000'}
+                onChange={(e) => onUpdateState({ backTextColor: e.target.value })}
+                className="w-full h-10 border rounded-lg cursor-pointer"
               />
-              <div className="grid grid-cols-2 gap-3">
-                <select
-                  value={customState.leftLegTextFont || 'Arial'}
-                  onChange={(e) => onUpdateState({ leftLegTextFont: e.target.value })}
-                  className="px-2 py-2 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-green-500"
-                >
-                  {fonts.map((font) => (
-                    <option key={font} value={font}>{font}</option>
-                  ))}
-                </select>
-                <input
-                  type="color"
-                  value={customState.leftLegTextColor || '#FFFFFF'}
-                  onChange={(e) => onUpdateState({ leftLegTextColor: e.target.value })}
-                  className="w-full h-10 border border-gray-300 rounded-lg cursor-pointer"
-                />
-              </div>
             </div>
           </div>
-        </>
-      )}
+        </div>
+      </>
     </motion.div>
   );
 }
 
-export function LogoUploadPanel({ 
-  isOpen, 
-  customState, 
-  onFileUpload 
+
+export function LogoUploadPanel({
+  isOpen,
+  customState,
+  onFileUpload
 }) {
   if (!isOpen) return null;
 
@@ -178,7 +115,7 @@ export function LogoUploadPanel({
         <Upload className="w-5 h-5 mr-2" />
         Logo Upload
       </h3>
-      
+
       <div className="space-y-4">
         {/* Left Chest */}
         <div className="bg-purple-50 p-3 rounded-lg border border-purple-200">
@@ -254,11 +191,11 @@ export function LogoUploadPanel({
   );
 }
 
-export function VisibilityPanel({ 
-  isOpen, 
-  activeProduct, 
-  customState, 
-  onToggleElement 
+export function VisibilityPanel({
+  isOpen,
+  activeProduct,
+  customState,
+  onToggleElement
 }) {
   if (!isOpen) return null;
 
@@ -274,6 +211,7 @@ export function VisibilityPanel({
         { key: 'isFullTexture', label: 'Full Pattern' },
       ];
     }
+    // Note: You can expand this for 'trouser'/'shoe' if they get visibility options later
     return [
       { key: 'isRightLegText', label: 'Right Leg Text' },
       { key: 'isLeftLegText', label: 'Left Leg Text' },
@@ -295,17 +233,16 @@ export function VisibilityPanel({
         <Eye className="w-5 h-5 mr-2" />
         Show/Hide Elements
       </h3>
-      
+
       <div className="space-y-2">
         {getVisibilityOptions().map(({ key, label }) => (
           <button
             key={key}
             onClick={() => onToggleElement(key)}
-            className={`w-full px-3 py-2 rounded-lg text-sm font-medium transition-all text-left ${
-              customState[key]
+            className={`w-full px-3 py-2 rounded-lg text-sm font-medium transition-all text-left ${customState[key]
                 ? 'bg-green-500 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
+              }`}
           >
             {customState[key] ? '✓ ' : '○ '}{label}
           </button>
@@ -315,7 +252,7 @@ export function VisibilityPanel({
   );
 }
 
-export function ControlSidebar({ 
+export function ControlSidebar({
   activeProduct,
   activePopup,
   onSetActivePopup,
@@ -324,91 +261,110 @@ export function ControlSidebar({
   onFileUpload,
   onToggleElement,
   onDownload,
-  onReset
+  onReset,
+  onAddToCart
 }) {
-  // Only show controls for shirt and trouser
-  if (activeProduct !== 'shirt' && activeProduct !== 'trouser') {
-    return null;
+  
+  //  CSS-in-JS for the gradient to bypass Tailwind compilation issues
+  const gradientStyle = {
+    background: 'linear-gradient(to right, #f97316, #ef4444)' // This is orange-500 to red-500
+  };
+
+  // 🚫 For trouser & shoes → only cart button
+  if (activeProduct === "trouser" || activeProduct === "shoe") {
+    return (
+      <div className="absolute bottom-20 right-4 z-20">
+        <button
+          onClick={onAddToCart}
+          // ✅ FIXED: Using inline style for the gradient
+          style={gradientStyle}
+          // ✅ REMOVED: bg-gradient-to-r, from-orange-500, to-red-500
+          className="flex flex-col items-center text-white px-5 py-4 rounded-2xl shadow-xl border-2 border-white hover:shadow-orange-400 hover:scale-105 transition-all"
+        >
+          <ShoppingCart className="w-6 h-6 mb-1" />
+          <span className="text-sm font-semibold">Add to Cart</span>
+        </button>
+      </div>
+    );
   }
 
+  // 🧥 For shirt → keep full sidebar controls
   return (
     <div className="absolute top-20 left-0 bottom-0 w-20 z-20 bg-white shadow-sm border-r pt-16">
       <div className="flex flex-col items-center py-4 space-y-4">
-        
+
         {/* Text Button */}
         <div className="relative">
           <button
-            onClick={() => onSetActivePopup(activePopup === 'text' ? '' : 'text')}
-            className={`w-12 h-12 rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center text-lg font-bold border-2 ${
-              activePopup === 'text'
-                ? 'bg-blue-500 text-white shadow-blue-300 border-blue-400'
-                : 'bg-white text-blue-600 hover:bg-blue-50 border-blue-200 hover:border-blue-400'
-            }`}
+            onClick={() => onSetActivePopup(activePopup === "text" ? "" : "text")}
+            className={`w-12 h-12 rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center text-lg font-bold border-2 ${activePopup === "text"
+                ? "bg-blue-500 text-white shadow-blue-300 border-blue-400"
+                : "bg-white text-blue-600 hover:bg-blue-50 border-blue-200 hover:border-blue-400"
+              }`}
             title="Text Controls"
           >
             <Type className="w-5 h-5" />
           </button>
-          
+
           <TextControlPanel
-            isOpen={activePopup === 'text'}
+            isOpen={activePopup === "text"}
             activeProduct={activeProduct}
             customState={customState}
             onUpdateState={onUpdateState}
           />
         </div>
 
-        {/* Logo Button - Only for shirt */}
-        {activeProduct === 'shirt' && (
-          <div className="relative">
-            <button
-              onClick={() => onSetActivePopup(activePopup === 'logo' ? '' : 'logo')}
-              className={`w-12 h-12 rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center border-2 ${
-                activePopup === 'logo'
-                  ? 'bg-purple-500 text-white shadow-purple-300 border-purple-400'
-                  : 'bg-white text-purple-600 hover:bg-purple-50 border-purple-200 hover:border-purple-400'
-              }`}
-              title="Logo Upload"
-            >
-              <Upload className="w-5 h-5" />
-            </button>
-            
-            <LogoUploadPanel
-              isOpen={activePopup === 'logo'}
-              customState={customState}
-              onFileUpload={onFileUpload}
-            />
-          </div>
-        )}
-
-        {/* Visibility Toggle Button */}
+        {/* Logo (only shirt) */}
         <div className="relative">
           <button
-            onClick={() => onSetActivePopup(activePopup === 'visibility' ? '' : 'visibility')}
-            className={`w-12 h-12 rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center border-2 ${
-              activePopup === 'visibility'
-                ? 'bg-green-500 text-white shadow-green-300 border-green-400'
-                : 'bg-white text-green-600 hover:bg-green-50 border-green-200 hover:border-green-400'
-            }`}
+            onClick={() => onSetActivePopup(activePopup === "logo" ? "" : "logo")}
+            className={`w-12 h-12 rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center border-2 ${activePopup === "logo"
+                ? "bg-purple-500 text-white shadow-purple-300 border-purple-400"
+                : "bg-white text-purple-600 hover:bg-purple-50 border-purple-200 hover:border-purple-400"
+              }`}
+            title="Logo Upload"
+          >
+            <Upload className="w-5 h-5" />
+          </button>
+
+          <LogoUploadPanel
+            isOpen={activePopup === "logo"}
+            customState={customState}
+            onFileUpload={onFileUpload}
+          />
+        </div>
+
+        {/* Visibility */}
+        <div className="relative">
+          <button
+            onClick={() => onSetActivePopup(activePopup === "visibility" ? "" : "visibility")}
+            className={`w-12 h-12 rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center border-2 ${activePopup === "visibility"
+                ? "bg-green-500 text-white shadow-green-300 border-green-400"
+                : "bg-white text-green-600 hover:bg-green-50 border-green-200 hover:border-green-400"
+              }`}
             title="Show/Hide Elements"
           >
             <Eye className="w-5 h-5" />
           </button>
-          
+
           <VisibilityPanel
-            isOpen={activePopup === 'visibility'}
+            isOpen={activePopup === "visibility"}
             activeProduct={activeProduct}
             customState={customState}
             onToggleElement={onToggleElement}
           />
         </div>
 
-        {/* Download Button */}
+        {/* Cart Button */}
         <button
-          onClick={onDownload}
-          className="w-12 h-12 rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:shadow-xl transform hover:scale-105 border-2 border-white"
-          title="Download Design"
+          onClick={onAddToCart}
+          // ✅ FIXED: Using inline style for the gradient
+          style={gradientStyle}
+          // ✅ REMOVED: bg-gradient-to-r, from-orange-500, to-red-500
+          className="w-12 h-12 rounded-full shadow-lg transition-all duration-200 flex items-center justify-center text-white hover:shadow-xl transform hover:scale-105 border-2 border-white"
+          title="Add to Cart"
         >
-          <Save className="w-5 h-5" />
+          <ShoppingCart className="w-5 h-5" />
         </button>
 
       </div>

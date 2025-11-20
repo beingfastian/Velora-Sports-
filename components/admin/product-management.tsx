@@ -21,8 +21,23 @@ import {
 } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
-import { Plus, Edit, Trash2, Loader2 } from "lucide-react"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Plus, Edit, Trash2, Loader2, X } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+
+const AVAILABLE_SIZES = ["XS", "S", "M", "L", "XL", "XXL"]
+const AVAILABLE_COLORS = [
+  { name: "Black", value: "black", hex: "#000000" },
+  { name: "White", value: "white", hex: "#FFFFFF" },
+  { name: "Red", value: "red", hex: "#EF4444" },
+  { name: "Blue", value: "blue", hex: "#3B82F6" },
+  { name: "Green", value: "green", hex: "#10B981" },
+  { name: "Yellow", value: "yellow", hex: "#F59E0B" },
+  { name: "Purple", value: "purple", hex: "#A855F7" },
+  { name: "Pink", value: "pink", hex: "#EC4899" },
+  { name: "Gray", value: "gray", hex: "#6B7280" },
+  { name: "Navy", value: "navy", hex: "#1E40AF" },
+]
 
 export function ProductManagement() {
   const [products, setProducts] = useState<Product[]>([])
@@ -39,8 +54,8 @@ export function ProductManagement() {
     originalPrice: "",
     category: "",
     subcategory: "",
-    sizes: "",
-    colors: "",
+    sizes: [] as string[],
+    colors: [] as string[],
     inStock: true,
     featured: false,
   })
@@ -79,24 +94,16 @@ export function ProductManagement() {
     }
   }
 
-  const uploadImages = async (files: FileList): Promise<string[]> => {
-    console.log("Uploading", files.length, "images...")
-    const uploadPromises = Array.from(files).map(async (file, index) => {
-      try {
-        const fileName = `${Date.now()}_${index}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`
-        const storageRef = ref(storage, `products/${fileName}`)
-        
-        console.log(`Uploading image ${index + 1}:`, fileName)
-        const snapshot = await uploadBytes(storageRef, file)
-        const downloadURL = await getDownloadURL(snapshot.ref)
-        console.log(`Image ${index + 1} uploaded successfully:`, downloadURL)
-        return downloadURL
-      } catch (error) {
-        console.error(`Error uploading image ${index + 1}:`, error)
-        throw new Error(`Failed to upload image: ${file.name}`)
-      }
-    })
+  const uploadImage = async (file: File): Promise<string> => {
+    const fileName = `${Date.now()}_${file.name}`
+    const storageRef = ref(storage, `products/${fileName}`)
+    const snapshot = await uploadBytes(storageRef, file)
+    const downloadUrl = await getDownloadURL(snapshot.ref)
+    return downloadUrl
+  }
 
+  const uploadImages = async (files: FileList): Promise<string[]> => {
+    const uploadPromises = Array.from(files).map(file => uploadImage(file))
     return Promise.all(uploadPromises)
   }
 
@@ -148,8 +155,8 @@ export function ProductManagement() {
         originalPrice: formData.originalPrice ? parseFloat(formData.originalPrice) : null,
         category: formData.category as Product["category"],
         subcategory: formData.subcategory?.trim() || null,
-        sizes: formData.sizes ? formData.sizes.split(",").map((s) => s.trim()).filter(Boolean) : [],
-        colors: formData.colors ? formData.colors.split(",").map((c) => c.trim()).filter(Boolean) : [],
+        sizes: formData.sizes,
+        colors: formData.colors,
         inStock: formData.inStock,
         featured: formData.featured,
         images: imageUrls,
@@ -205,8 +212,8 @@ export function ProductManagement() {
       originalPrice: product.originalPrice?.toString() || "",
       category: product.category,
       subcategory: product.subcategory || "",
-      sizes: product.sizes?.join(", ") || "",
-      colors: product.colors?.join(", ") || "",
+      sizes: product.sizes || [],
+      colors: product.colors || [],
       inStock: product.inStock,
       featured: product.featured,
     })
@@ -244,8 +251,8 @@ export function ProductManagement() {
       originalPrice: "",
       category: "",
       subcategory: "",
-      sizes: "",
-      colors: "",
+      sizes: [],
+      colors: [],
       inStock: true,
       featured: false,
     })
@@ -268,6 +275,24 @@ export function ProductManagement() {
   const handleAddProduct = () => {
     resetForm()
     setIsDialogOpen(true)
+  }
+
+  const toggleSize = (size: string) => {
+    setFormData(prev => ({
+      ...prev,
+      sizes: prev.sizes.includes(size)
+        ? prev.sizes.filter(s => s !== size)
+        : [...prev.sizes, size]
+    }))
+  }
+
+  const toggleColor = (color: string) => {
+    setFormData(prev => ({
+      ...prev,
+      colors: prev.colors.includes(color)
+        ? prev.colors.filter(c => c !== color)
+        : [...prev.colors, color]
+    }))
   }
 
   if (fetchingProducts) {
@@ -417,26 +442,46 @@ export function ProductManagement() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="sizes">Sizes (comma separated)</Label>
-                <Input
-                  id="sizes"
-                  value={formData.sizes}
-                  onChange={(e) => setFormData({ ...formData, sizes: e.target.value })}
-                  placeholder="XS, S, M, L, XL"
-                  disabled={loading}
-                />
+            <div className="space-y-2">
+              <Label>Available Sizes</Label>
+              <div className="flex flex-wrap gap-2">
+                {AVAILABLE_SIZES.map((size) => (
+                  <Button
+                    key={size}
+                    type="button"
+                    variant={formData.sizes.includes(size) ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => toggleSize(size)}
+                    disabled={loading}
+                  >
+                    {size}
+                  </Button>
+                ))}
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="colors">Colors (comma separated)</Label>
-                <Input
-                  id="colors"
-                  value={formData.colors}
-                  onChange={(e) => setFormData({ ...formData, colors: e.target.value })}
-                  placeholder="Black, White, Red"
-                  disabled={loading}
-                />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Available Colors</Label>
+              <div className="grid grid-cols-5 gap-2">
+                {AVAILABLE_COLORS.map((color) => (
+                  <button
+                    key={color.value}
+                    type="button"
+                    onClick={() => toggleColor(color.value)}
+                    disabled={loading}
+                    className={`flex flex-col items-center gap-1 p-2 rounded-lg border-2 transition-all ${
+                      formData.colors.includes(color.value)
+                        ? "border-primary bg-primary/10"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
+                    <div
+                      className="w-8 h-8 rounded-full border-2 border-gray-300"
+                      style={{ backgroundColor: color.hex }}
+                    />
+                    <span className="text-xs">{color.name}</span>
+                  </button>
+                ))}
               </div>
             </div>
 

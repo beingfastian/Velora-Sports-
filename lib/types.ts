@@ -3,27 +3,24 @@ export interface Product {
   name: string
   description: string
   price: number
-  originalPrice?: number
-  images: string[]
+  originalPrice?: number | null
   category: "men" | "women" | "training" | "running"
-  subcategory?: string
-  sizes: string[]
-  colors: string[]
+  subcategory?: string | null
+  sizes?: string[]
+  colors?: string[]
   inStock: boolean
   featured: boolean
-  createdAt: Date
-  updatedAt: Date
+  images: string[]
+  createdAt?: Date
+  updatedAt?: Date
 }
 
-export interface CartItem {
-  id: string
-  productId: string
-  name: string
-  price: number
-  image: string
-  size: string
-  color: string
+export interface CartItem extends Product {
   quantity: number
+  selectedSize: string
+  selectedColor: string
+  isCustom?: boolean
+  customization?: any
 }
 
 export interface PromoCode {

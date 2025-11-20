@@ -1,49 +1,105 @@
-import React, { Suspense } from 'react';
-import { useFrame } from '@react-three/fiber';
-import { useGLTF, useTexture, Decal } from '@react-three/drei';
-import { easing } from 'maath';
-import * as THREE from 'three';
+import React, { Suspense, useEffect, useMemo } from "react";
+import { useFrame } from "@react-three/fiber";
+import { useGLTF, useTexture, Decal } from "@react-three/drei";
+import { easing } from "maath";
+import * as THREE from "three";
 
-// Shirt Model Component
+// Helper function to create text texture
+const createTextTexture = (text, font, color, fontSize = 512) => {
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  
+  // Set font first to measure text
+  ctx.font = `bold ${fontSize}px ${font}`;
+  
+  // Measure text width
+  const metrics = ctx.measureText(text);
+  const textWidth = metrics.width;
+  
+  // Set canvas size with padding
+  canvas.width = Math.max(textWidth + 200, 1024); // Add padding and minimum width
+  canvas.height = 512;
+  
+  // Clear and redraw (setting canvas size resets context)
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  // Set text properties again after resize
+  ctx.font = `bold ${fontSize}px ${font}`;
+  ctx.fillStyle = color;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  
+  // Draw text
+  ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+  
+  // Create texture
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.needsUpdate = true;
+  
+  return texture;
+};
+
+/* 🧥 SHIRT */
 export function ShirtMesh({ customState }) {
-  const fallbackTexture = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=';
-  
-  const { nodes, materials } = useGLTF('/models/shirt.glb');
-  
-  // Load textures with proper fallback
-  const leftChestTexture = useTexture(customState.leftChestDecal && customState.leftChestDecal !== fallbackTexture ? customState.leftChestDecal : fallbackTexture);
-  const mainChestTexture = useTexture(customState.mainChestDecal && customState.mainChestDecal !== fallbackTexture ? customState.mainChestDecal : fallbackTexture);
-  const rightChestTexture = useTexture(customState.rightChestDecal && customState.rightChestDecal !== fallbackTexture ? customState.rightChestDecal : fallbackTexture);
-  const fullBackTexture = useTexture(customState.fullBackDecal && customState.fullBackDecal !== fallbackTexture ? customState.fullBackDecal : fallbackTexture);
-  const fullTexture = useTexture(customState.fullDecal && customState.fullDecal !== fallbackTexture ? customState.fullDecal : fallbackTexture);
+  const fallbackTexture =
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=";
 
-  useFrame((state, delta) => {
+  const { nodes, materials } = useGLTF("/models/shirt.glb");
+
+  const leftChestTexture = useTexture(
+    customState.leftChestDecal && customState.leftChestDecal !== fallbackTexture
+      ? customState.leftChestDecal
+      : fallbackTexture
+  );
+  const mainChestTexture = useTexture(
+    customState.mainChestDecal && customState.mainChestDecal !== fallbackTexture
+      ? customState.mainChestDecal
+      : fallbackTexture
+  );
+  const rightChestTexture = useTexture(
+    customState.rightChestDecal && customState.rightChestDecal !== fallbackTexture
+      ? customState.rightChestDecal
+      : fallbackTexture
+  );
+  const fullBackTexture = useTexture(
+    customState.fullBackDecal && customState.fullBackDecal !== fallbackTexture
+      ? customState.fullBackDecal
+      : fallbackTexture
+  );
+  const fullTexture = useTexture(
+    customState.fullDecal && customState.fullDecal !== fallbackTexture
+      ? customState.fullDecal
+      : fallbackTexture
+  );
+
+  // Generate text textures
+  const frontTextTexture = useMemo(() => {
+    if (customState.frontText) {
+      return createTextTexture(
+        customState.frontText,
+        customState.frontTextFont || 'Arial',
+        customState.frontTextColor || '#000000'
+      );
+    }
+    return null;
+  }, [customState.frontText, customState.frontTextFont, customState.frontTextColor]);
+
+  const backTextTexture = useMemo(() => {
+    if (customState.backText) {
+      return createTextTexture(
+        customState.backText,
+        customState.backTextFont || 'Arial',
+        customState.backTextColor || '#000000'
+      );
+    }
+    return null;
+  }, [customState.backText, customState.backTextFont, customState.backTextColor]);
+
+  useFrame((_, delta) => {
     if (materials?.lambert1?.color) {
       easing.dampC(materials.lambert1.color, customState.color, 0.25, delta);
     }
   });
-
-  const createTextTexture = (text, font, size, color) => {
-    if (typeof window === 'undefined') return null;
-    
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    
-    canvas.width = 512;
-    canvas.height = 256;
-    
-    ctx.font = `bold ${size}px ${font}`;
-    ctx.fillStyle = color;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillText(text, canvas.width / 2, canvas.height / 2);
-    
-    const texture = new THREE.CanvasTexture(canvas);
-    texture.needsUpdate = true;
-    return texture;
-  };
 
   if (!nodes?.T_Shirt_male || !materials?.lambert1) {
     return (
@@ -62,87 +118,61 @@ export function ShirtMesh({ customState }) {
         material-metalness={0.1}
         dispose={null}
       >
-        {/* Full Texture Decal */}
-        {customState.isFullTexture && customState.fullDecal !== fallbackTexture && (
-          <Decal
-            position={[0, 0, 0]}
-            rotation={[0, 0, 0]}
-            scale={1}
-            map={fullTexture}
-            depthTest={false}
-            depthWrite={true}
-          />
+        {customState.isFullTexture && (
+          <Decal position={[0, 0, 0]} rotation={[0, 0, 0]} scale={1} map={fullTexture} />
         )}
-
-        {/* Left Chest Logo */}
-        {customState.isLeftChestLogo && customState.leftChestDecal !== fallbackTexture && (
+        {customState.isLeftChestLogo && (
           <Decal
             position={[-0.1, 0.05, 0.15]}
             rotation={[0, 0, 0]}
             scale={0.1}
             map={leftChestTexture}
-            depthTest={false}
-            depthWrite={true}
           />
         )}
-
-        {/* Main Chest Logo */}
-        {customState.isMainChestLogo && customState.mainChestDecal !== fallbackTexture && (
+        {customState.isMainChestLogo && (
           <Decal
             position={[0, 0.05, 0.15]}
             rotation={[0, 0, 0]}
             scale={0.2}
             map={mainChestTexture}
-            depthTest={false}
-            depthWrite={true}
           />
         )}
-
-        {/* Right Chest Logo */}
-        {customState.isRightChestLogo && customState.rightChestDecal !== fallbackTexture && (
+        {customState.isRightChestLogo && (
           <Decal
             position={[0.1, 0.05, 0.15]}
             rotation={[0, 0, 0]}
             scale={0.1}
             map={rightChestTexture}
-            depthTest={false}
-            depthWrite={true}
           />
         )}
-
-        {/* Full Back Logo */}
-        {customState.isFullBackLogo && customState.fullBackDecal !== fallbackTexture && (
+        {customState.isFullBackLogo && (
           <Decal
             position={[0, 0.05, -0.15]}
             rotation={[0, Math.PI, 0]}
             scale={0.25}
             map={fullBackTexture}
-            depthTest={false}
-            depthWrite={true}
           />
         )}
-
-        {/* Front Text Decal */}
-        {customState.isFrontText && customState.frontText && (
+        
+        {/* Front Text as Decal */}
+        {customState.isFrontText && frontTextTexture && (
           <Decal
-            position={[0, -0.12, 0.15]}
+            position={[0, -0.10, 0.15]}
             rotation={[0, 0, 0]}
-            scale={0.4}
-            map={createTextTexture(customState.frontText, customState.frontTextFont, customState.frontTextSize, customState.frontTextColor)}
-            depthTest={false}
-            depthWrite={true}
+            scale={0.12}
+            map={frontTextTexture}
+            transparent={true}
           />
         )}
 
-        {/* Back Text Decal */}
-        {customState.isBackText && customState.backText && (
+        {/* Back Text as Decal */}
+        {customState.isBackText && backTextTexture && (
           <Decal
-            position={[0, -0.13, -0.15]}
+            position={[0, -0.10, -0.15]}
             rotation={[0, Math.PI, 0]}
-            scale={0.4}
-            map={createTextTexture(customState.backText, customState.backTextFont, customState.backTextSize, customState.backTextColor)}
-            depthTest={false}
-            depthWrite={true}
+            scale={0.12}
+            map={backTextTexture}
+            transparent={true}
           />
         )}
       </mesh>
@@ -150,220 +180,193 @@ export function ShirtMesh({ customState }) {
   );
 }
 
-// Trouser Model Component - Updated to use GLTF model
+/* 👖 TROUSER */
 export function TrouserMesh({ customState }) {
-  const fallbackTexture = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=';
-  
-  const { nodes, materials } = useGLTF('/models/solid_color_formal_pant.glb');
-  
-  const rightLegTexture = useTexture(customState.rightLegDecal && customState.rightLegDecal !== fallbackTexture ? customState.rightLegDecal : fallbackTexture);
-  const leftLegTexture = useTexture(customState.leftLegDecal && customState.leftLegDecal !== fallbackTexture ? customState.leftLegDecal : fallbackTexture);
+  const { nodes, materials } = useGLTF("/models/tactical-pants-001.glb");
 
-  useFrame((state, delta) => {
-    // Update material color if available
+  useFrame((_, delta) => {
     if (materials) {
-      Object.values(materials).forEach(material => {
-        if (material?.color) {
-          easing.dampC(material.color, customState.color, 0.25, delta);
-        }
+      Object.values(materials).forEach((mat) => {
+        if (mat?.color) easing.dampC(mat.color, customState.color, 0.25, delta);
       });
     }
   });
 
-  const createVerticalTextTexture = (text, font, size, color) => {
-    if (typeof window === 'undefined') return null;
-    
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    
-    canvas.width = 256;
-    canvas.height = 512;
-    
-    ctx.font = `bold ${size}px ${font}`;
-    ctx.fillStyle = color;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    ctx.save();
-    ctx.translate(canvas.width / 2, canvas.height / 2);
-    ctx.rotate(-Math.PI / 2);
-    ctx.fillText(text, 0, 0);
-    ctx.restore();
-    
-    const texture = new THREE.CanvasTexture(canvas);
-    texture.needsUpdate = true;
-    return texture;
-  };
-
-  // Fallback if model doesn't load
   if (!nodes || !materials) {
-    const trouserGeometry = new THREE.CylinderGeometry(0.4, 0.5, 1.8, 16);
-    const trouserMaterial = new THREE.MeshStandardMaterial({ 
-      color: customState.color,
-      metalness: 0.1,
-      roughness: 0.8 
-    });
-
     return (
-      <group scale={[0.8, 0.8, 0.8]}>
-        <mesh geometry={trouserGeometry} material={trouserMaterial}>
-          {customState.isRightLegText && customState.rightLegText && (
-            <Decal
-              position={[0.4, -0.2, 0]}
-              rotation={[0, Math.PI / 2, 0]}
-              scale={[0.3, 0.6, 0.3]}
-              map={createVerticalTextTexture(customState.rightLegText, customState.rightLegTextFont, 40, customState.rightLegTextColor)}
-              depthTest={false}
-              depthWrite={true}
-            />
-          )}
+      <mesh>
+        <cylinderGeometry args={[0.5, 0.5, 2, 16]} />
+        <meshStandardMaterial color={customState.color} />
+      </mesh>
+    );
+  }
 
-          {customState.isLeftLegText && customState.leftLegText && (
-            <Decal
-              position={[-0.4, -0.2, 0]}
-              rotation={[0, -Math.PI / 2, 0]}
-              scale={[0.3, 0.6, 0.3]}
-              map={createVerticalTextTexture(customState.leftLegText, customState.leftLegTextFont, 40, customState.leftLegTextColor)}
-              depthTest={false}
-              depthWrite={true}
+  return (
+    <group scale={[1, 1, 1]} position={[0, -0.4, 0]}>
+      {Object.keys(nodes).map((key) => {
+        const mesh = nodes[key];
+        if (mesh.geometry) {
+          return (
+            <mesh
+              key={key}
+              geometry={mesh.geometry}
+              material={
+                materials[mesh.material?.name] || materials[Object.keys(materials)[0]]
+              }
+              material-metalness={0.1}
             />
-          )}
+          );
+        }
+        return null;
+      })}
+    </group>
+  );
+}
+
+/* 🧢 HAT */
+export function HatMesh({ customState }) {
+  const { nodes, materials } = useGLTF("/models/hat.glb");
+
+  useFrame((_, delta) => {
+    if (materials) {
+      Object.values(materials).forEach((mat) => {
+        if (mat?.color) easing.dampC(mat.color, customState.color, 0.25, delta);
+      });
+    }
+  });
+
+  if (!nodes || !materials) {
+    return (
+      <group>
+        <mesh>
+          <cylinderGeometry args={[0.8, 0.8, 0.05, 32]} />
+          <meshStandardMaterial color={customState.color} />
         </mesh>
-        
-        <mesh position={[-0.25, -1.2, 0]}>
-          <cylinderGeometry args={[0.2, 0.25, 1.2, 12]} />
-          <meshStandardMaterial color={customState.color} metalness={0.1} roughness={0.8} />
-        </mesh>
-        
-        <mesh position={[0.25, -1.2, 0]}>
-          <cylinderGeometry args={[0.2, 0.25, 1.2, 12]} />
-          <meshStandardMaterial color={customState.color} metalness={0.1} roughness={0.8} />
+        <mesh position={[0, 0.3, 0]}>
+          <cylinderGeometry args={[0.5, 0.5, 0.6, 32]} />
+          <meshStandardMaterial color={customState.color} />
         </mesh>
       </group>
     );
   }
 
-  // Use the actual GLTF model
-  const meshes = Object.keys(nodes).map(key => {
-    const mesh = nodes[key];
-    if (mesh.geometry) {
-      return (
-        <mesh
-          key={key}
-          geometry={mesh.geometry}
-          material={materials[mesh.material?.name] || materials[Object.keys(materials)[0]]}
-          material-metalness={0.1}
-          dispose={null}
-        >
-          {/* Right Leg Text */}
-          {customState.isRightLegText && customState.rightLegText && (
-            <Decal
-              position={[0.5, -0.3, 0]}
-              rotation={[0, Math.PI / 2, 0]}
-              scale={[0.4, 0.8, 0.4]}
-              map={createVerticalTextTexture(customState.rightLegText, customState.rightLegTextFont, 40, customState.rightLegTextColor)}
-              depthTest={false}
-              depthWrite={true}
-            />
-          )}
-
-          {/* Left Leg Text */}
-          {customState.isLeftLegText && customState.leftLegText && (
-            <Decal
-              position={[-0.5, -0.3, 0]}
-              rotation={[0, -Math.PI / 2, 0]}
-              scale={[0.4, 0.8, 0.4]}
-              map={createVerticalTextTexture(customState.leftLegText, customState.leftLegTextFont, 40, customState.leftLegTextColor)}
-              depthTest={false}
-              depthWrite={true}
-            />
-          )}
-        </mesh>
-      );
-    }
-    return null;
-  });
-
-  return <group>{meshes}</group>;
-}
-
-// Hat Model Component
-export function HatMesh({ customState }) {
-  const hatMaterial = new THREE.MeshStandardMaterial({ 
-    color: customState.color,
-    metalness: 0.1,
-    roughness: 0.8 
-  });
-
-  useFrame((state, delta) => {
-    if (hatMaterial?.color) {
-      easing.dampC(hatMaterial.color, customState.color, 0.25, delta);
-    }
-  });
-
   return (
-    <group>
-      {/* Hat brim */}
-      <mesh position={[0, 0, 0]}>
-        <cylinderGeometry args={[0.8, 0.8, 0.05, 32]} />
-        <meshStandardMaterial color={customState.color} metalness={0.1} roughness={0.8} />
-      </mesh>
-      
-      {/* Hat crown */}
-      <mesh position={[0, 0.3, 0]}>
-        <cylinderGeometry args={[0.5, 0.5, 0.6, 32]} />
-        <meshStandardMaterial color={customState.color} metalness={0.1} roughness={0.8} />
-      </mesh>
+    <group scale={[1, 1, 1]}>
+      {Object.keys(nodes).map((key) => {
+        const mesh = nodes[key];
+        if (mesh.geometry) {
+          return (
+            <mesh
+              key={key}
+              geometry={mesh.geometry}
+              material={
+                materials[mesh.material?.name] || materials[Object.keys(materials)[0]]
+              }
+            />
+          );
+        }
+        return null;
+      })}
     </group>
   );
 }
 
-// Shoe Model Component
+/* 👟 SHOE (FIXED COLOR HANDLING) */
 export function ShoeMesh({ customState }) {
-  const shoeMaterial = new THREE.MeshStandardMaterial({ 
-    color: customState.color,
-    metalness: 0.2,
-    roughness: 0.6 
+  const { nodes, materials } = useGLTF("/models/white_right_shoe.glb");
+
+  // ✅ Create separate material groups for body and sole
+  const materialGroups = useMemo(() => {
+    if (!materials) return { body: [], sole: [] };
+    
+    const body = [];
+    const sole = [];
+    
+    Object.entries(materials).forEach(([key, mat]) => {
+      // Identify sole materials (adjust these names based on your model)
+      if (key.toLowerCase().includes('sole') || 
+          key.toLowerCase().includes('bottom') ||
+          key.toLowerCase().includes('rubber')) {
+        sole.push(mat);
+      } else {
+        body.push(mat);
+      }
+    });
+    
+    return { body, sole };
+  }, [materials]);
+
+  // ✅ Animate color changes smoothly
+  useFrame((_, delta) => {
+    if (!materials) return;
+
+    // Update body color
+    materialGroups.body.forEach((mat) => {
+      if (mat?.color && customState.bodyColor) {
+        easing.dampC(mat.color, customState.bodyColor, 0.25, delta);
+      }
+    });
+
+    // Update sole color
+    materialGroups.sole.forEach((mat) => {
+      if (mat?.color && customState.soleColor) {
+        easing.dampC(mat.color, customState.soleColor, 0.25, delta);
+      }
+    });
   });
 
-  useFrame((state, delta) => {
-    if (shoeMaterial?.color) {
-      easing.dampC(shoeMaterial.color, customState.color, 0.25, delta);
-    }
-  });
+  if (!nodes || !materials) {
+    return (
+      <mesh>
+        <boxGeometry args={[1, 0.5, 2]} />
+        <meshStandardMaterial color={customState.bodyColor || customState.color} />
+      </mesh>
+    );
+  }
 
   return (
-    <group>
-      {/* Shoe body */}
-      <mesh position={[0, 0, 0.2]}>
-        <boxGeometry args={[0.8, 0.4, 1.2]} />
-        <meshStandardMaterial color={customState.color} metalness={0.2} roughness={0.6} />
-      </mesh>
-      
-      {/* Shoe sole */}
-      <mesh position={[0, -0.25, 0.1]}>
-        <boxGeometry args={[0.85, 0.1, 1.4]} />
-        <meshStandardMaterial color="#2D1810" metalness={0.1} roughness={0.9} />
-      </mesh>
+    <group scale={[1, 1, 1]} rotation={[0, Math.PI / 2, 0]}>
+      {Object.keys(nodes).map((key) => {
+        const mesh = nodes[key];
+        if (mesh.geometry) {
+          return (
+            <mesh
+              key={key}
+              geometry={mesh.geometry}
+              material={
+                materials[mesh.material?.name] ||
+                new THREE.MeshStandardMaterial({
+                  color: customState.bodyColor || customState.color,
+                  metalness: 0.2,
+                  roughness: 0.6,
+                })
+              }
+              material-metalness={0.2}
+              material-roughness={0.6}
+            />
+          );
+        }
+        return null;
+      })}
     </group>
   );
 }
 
-// Main Product Model Component
+/* 🧩 Main Product Switch */
 export function ProductModel({ activeProduct, customState }) {
   return (
-    <Suspense fallback={
-      <mesh>
-        <boxGeometry args={[1, 1.5, 0.1]} />
-        <meshStandardMaterial color={customState.color} />
-      </mesh>
-    }>
-      {activeProduct === 'shirt' && <ShirtMesh customState={customState} />}
-      {activeProduct === 'trouser' && <TrouserMesh customState={customState} />}
-      {activeProduct === 'hat' && <HatMesh customState={customState} />}
-      {activeProduct === 'shoe' && <ShoeMesh customState={customState} />}
+    <Suspense
+      fallback={
+        <mesh>
+          <boxGeometry args={[1, 1.5, 0.1]} />
+          <meshStandardMaterial color={customState.color} />
+        </mesh>
+      }
+    >
+      {activeProduct === "shirt" && <ShirtMesh customState={customState} />}
+      {activeProduct === "trouser" && <TrouserMesh customState={customState} />}
+      {activeProduct === "hat" && <HatMesh customState={customState} />}
+      {activeProduct === "shoe" && <ShoeMesh customState={customState} />}
     </Suspense>
   );
 }

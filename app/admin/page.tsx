@@ -3,7 +3,7 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import { collection, query, where, getDocs } from "firebase/firestore"
-import { db } from "@/lib/firebase" // Make sure you export db from your firebase config
+import { db } from "@/lib/firebase"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -14,11 +14,13 @@ import { OrderManagement } from "@/components/admin/order-management"
 import { PromoCodeManagement } from "@/components/admin/promo-code-management"
 import { LogOut, Package, ShoppingCart, Tag } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { Settings } from "lucide-react"
+import { SettingsManagement } from "@/components/admin/settings-management"
 
 interface AdminUser {
   id: string
   username: string
-  password: string // In production, this should be hashed!
+  password: string
   role: string
   isActive: boolean
 }
@@ -31,66 +33,85 @@ export default function AdminPage() {
   const [currentAdmin, setCurrentAdmin] = useState<AdminUser | null>(null)
   const { toast } = useToast()
 
-  // Check if user is already logged in (using localStorage for session persistence)
   useEffect(() => {
     const savedAdmin = localStorage.getItem('adminSession')
     if (savedAdmin) {
-      const adminData = JSON.parse(savedAdmin)
-      setCurrentAdmin(adminData)
-      setIsAuthenticated(true)
+      try {
+        const adminData = JSON.parse(savedAdmin)
+        setCurrentAdmin(adminData)
+        setIsAuthenticated(true)
+      } catch (error) {
+        localStorage.removeItem('adminSession')
+      }
     }
   }, [])
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
+const handleLogin = async (e: React.FormEvent) => {
+  e.preventDefault()
+  setLoading(true)
 
-    try {
-      // Query Firestore for admin credentials
-      const adminsRef = collection(db, "admins")
-      const q = query(
-        adminsRef, 
-        where("username", "==", username),
-        where("password", "==", password), // In production, hash the password before comparing
-        where("isActive", "==", true)
-      )
-      
-      const querySnapshot = await getDocs(q)
+  try {
+    console.log("Attempting login with:", { username, password })
+    
+    const adminsRef = collection(db, "admins")
+    
+    // First, get ALL admins to debug
+    const allAdmins = await getDocs(adminsRef)
+    console.log("Total admins in DB:", allAdmins.size)
+    allAdmins.forEach(doc => {
+      const data = doc.data()
+      console.log("Admin doc:", {
+        id: doc.id,
+        username: data.username,
+        password: data.password,
+        isActive: data.isActive,
+        usernameMatch: data.username === username,
+        passwordMatch: data.password === password,
+        isActiveMatch: data.isActive === true
+      })
+    })
+    
+    // Now try the query
+    const q = query(
+      adminsRef,
+      where("username", "==", username),
+      where("password", "==", password),
+      where("isActive", "==", true)
+    )
 
-      if (!querySnapshot.empty) {
-        // Admin found and credentials match
-        const adminDoc = querySnapshot.docs[0]
-        const adminData = { id: adminDoc.id, ...adminDoc.data() } as AdminUser
-        
-        setCurrentAdmin(adminData)
-        setIsAuthenticated(true)
-        
-        // Save session to localStorage
-        localStorage.setItem('adminSession', JSON.stringify(adminData))
-        
-        toast({
-          title: "Success",
-          description: `Welcome back, ${adminData.username}!`,
-        })
-      } else {
-        // Invalid credentials
-        toast({
-          title: "Error",
-          description: "Invalid username or password",
-          variant: "destructive",
-        })
-      }
-    } catch (error) {
-      console.error("Login error:", error)
+    const querySnapshot = await getDocs(q)
+    console.log("Query result - Found docs:", querySnapshot.size)
+
+    if (!querySnapshot.empty) {
+      const adminDoc = querySnapshot.docs[0]
+      const adminData = { id: adminDoc.id, ...adminDoc.data() } as AdminUser
+
+      setCurrentAdmin(adminData)
+      setIsAuthenticated(true)
+      localStorage.setItem('adminSession', JSON.stringify(adminData))
+
       toast({
-        title: "Error",
-        description: "Login failed. Please try again.",
+        title: "Success",
+        description: `Welcome back, ${adminData.username}!`,
+      })
+    } else {
+      toast({
+        title: "Login Failed",
+        description: "Invalid username or password",
         variant: "destructive",
       })
-    } finally {
-      setLoading(false)
     }
+  } catch (error) {
+    console.error("Login error:", error)
+    toast({
+      title: "Error",
+      description: "Something went wrong. Check console for details.",
+      variant: "destructive",
+    })
+  } finally {
+    setLoading(false)
   }
+}
 
   const handleLogout = () => {
     setIsAuthenticated(false)
@@ -98,7 +119,7 @@ export default function AdminPage() {
     setUsername("")
     setPassword("")
     localStorage.removeItem('adminSession')
-    
+
     toast({
       title: "Success",
       description: "Logged out successfully",
@@ -117,12 +138,13 @@ export default function AdminPage() {
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="username">Username</Label>
-                <Input 
-                  id="username" 
-                  type="text" 
-                  value={username} 
-                  onChange={(e) => setUsername(e.target.value)} 
-                  required 
+                <Input
+                  id="username"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                  autoComplete="username"
                 />
               </div>
               <div className="space-y-2">
@@ -133,6 +155,7 @@ export default function AdminPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  autoComplete="current-password"
                 />
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
@@ -163,34 +186,42 @@ export default function AdminPage() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        <Tabs defaultValue="products" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="products">
-              <Package className="w-4 h-4 mr-2" />
-              Products
-            </TabsTrigger>
-            <TabsTrigger value="orders">
-              <ShoppingCart className="w-4 h-4 mr-2" />
-              Orders
-            </TabsTrigger>
-            <TabsTrigger value="promos">
-              <Tag className="w-4 h-4 mr-2" />
-              Promo Codes
-            </TabsTrigger>
-          </TabsList>
+<Tabs defaultValue="products" className="space-y-6">
+  <TabsList className="grid w-full grid-cols-4">
+    <TabsTrigger value="products">
+      <Package className="w-4 h-4 mr-2" />
+      Products
+    </TabsTrigger>
+    <TabsTrigger value="orders">
+      <ShoppingCart className="w-4 h-4 mr-2" />
+      Orders
+    </TabsTrigger>
+    <TabsTrigger value="promos">
+      <Tag className="w-4 h-4 mr-2" />
+      Promo Codes
+    </TabsTrigger>
+    <TabsTrigger value="settings">
+      <Settings className="w-4 h-4 mr-2" />
+      Settings
+    </TabsTrigger>
+  </TabsList>
 
-          <TabsContent value="products">
-            <ProductManagement />
-          </TabsContent>
+  <TabsContent value="products">
+    <ProductManagement />
+  </TabsContent>
 
-          <TabsContent value="orders">
-            <OrderManagement />
-          </TabsContent>
+  <TabsContent value="orders">
+    <OrderManagement />
+  </TabsContent>
 
-          <TabsContent value="promos">
-            <PromoCodeManagement />
-          </TabsContent>
-        </Tabs>
+  <TabsContent value="promos">
+    <PromoCodeManagement />
+  </TabsContent>
+
+  <TabsContent value="settings">
+    <SettingsManagement />
+  </TabsContent>
+</Tabs>
       </div>
     </div>
   )
